@@ -1,0 +1,14 @@
+dist/**
+Distributions/**
+lib/*.jar
+staging/**
+local-tests/**
+src/installer/**
+hunspell-xml*.jar
+*.class
+*.tmp
+*.bak
+*.jar
+griffon-icon*.png
+HunspellXML-splash.bmp
+

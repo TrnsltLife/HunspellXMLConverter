@@ -1,0 +1,8 @@
+http://dren.dk/hunspell.html
+
+The code is tri-licensed under LGPL/GPL/MPL just like Hunspell itself, 
+this means that the user of the library can choose the license to best 
+fit the project.
+
+Regarding the LGPL/GPL version: Feel free to use the code under version 
+2.0 or later.

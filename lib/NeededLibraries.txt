@@ -1,0 +1,5 @@
+hunspell.jar and jna.jar - https://github.com/dren-dk/HunspellJNA
+jing.jar - http://www.thaiopensource.com/relaxng/jing.html
+hunspell-xml.jar - https://github.com/TrnsltLife/HunspellXML
+                   and 
+                   https://code.google.com/p/hunspellxml/downloads/list
