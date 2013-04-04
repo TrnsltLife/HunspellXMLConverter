@@ -2,6 +2,7 @@ package hunspellxml
 
 import groovy.beans.Bindable
 import org.sil.hunspellxml.HunspellTester
+import main.Preferences
 
 @Bindable
 //@PropertyListener()
@@ -24,6 +25,10 @@ class HunspellXMLModel
 		runTests:true,
 		customPath:"",
 		hunspellFileName:""]
+	
+	def xmlDirectory = ""
+	def dicDirectory = ""
+	def dirDirectory = ""
 		
    ArrayList toggleButtons = 
    [
@@ -39,4 +44,43 @@ class HunspellXMLModel
 	]
 	
 	HunspellTester tester
+	
+	
+	public HunspellXMLModel()
+	{
+		loadPreferences()
+	}
+	
+	
+	def loadPreferences()
+	{
+		def config = Preferences.loadPreferences()
+		if(config)
+		{
+			if(config.options)
+			{
+				for(key in config.options.keySet())
+				{
+					options[key] = config.options[key]
+				}
+			}
+			xmlDirectory = config.xmlDirectory
+			dicDirectory = config.dicDirectory
+			dirDirectory = config.dirDirectory
+			hunspellFileNameUseInput = config.hunspellFileNameUseInput
+		}
+	}
+	
+	def savePreferences()
+	{
+		def map = [:]
+		map.options = options
+		map.options.remove("customPath")
+		map.options.remove("hunspellFileName")
+		map.xmlDirectory = xmlDirectory.replaceAll($/\\/$, "/")
+		map.dicDirectory = dicDirectory.replaceAll($/\\/$, "/")
+		map.dirDirectory = dirDirectory.replaceAll($/\\/$, "/")
+		map.hunspellFileNameUseInput = hunspellFileNameUseInput
+		Preferences.savePreferences(map)
+	}
 }

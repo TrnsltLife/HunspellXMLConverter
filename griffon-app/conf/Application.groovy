@@ -3,7 +3,7 @@ application {
     startupGroups = ['hunspellXML']
 
     // Should Griffon exit when no Griffon created frames are showing?
-    autoShutdown = true
+    autoShutdown = false
 
     // If you want some non-standard application class, apply it here
     //frameClass = 'javax.swing.JFrame'

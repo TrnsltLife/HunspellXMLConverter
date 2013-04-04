@@ -3,7 +3,6 @@ package hunspellxml
 import javax.swing.JFileChooser
 import java.awt.Window
 import main.StackTrace
-//import main.HunspellTester
 import org.sil.hunspellxml.HunspellXMLConverter
 import org.sil.hunspellxml.HunspellTester
 
@@ -14,6 +13,7 @@ class HunspellXMLController {
 	def hxcLog
 	
 	def quit = { evt = null ->
+		savePreferences()
 		app.shutdown()
 	}
 	
@@ -38,20 +38,38 @@ class HunspellXMLController {
     }
 	
     def openAndConvert = { evt = null ->
+		if(model.xmlDirectory){view.fileChooserWindowXML.setCurrentDirectory(new File(model.xmlDirectory))}
 		def openResult = view.fileChooserWindowXML.showOpenDialog()
 		if(JFileChooser.APPROVE_OPTION == openResult) {
+			File file = new File(view.fileChooserWindowXML.selectedFile.toString())
 			doOutside {
-				File file = new File(view.fileChooserWindowXML.selectedFile.toString())
+				model.xmlDirectory = file.getParent().toString()
 				convert(file)
 			}
 		}
     }
 	
 	def openDictionary = { evt = null ->
+		if(model.dicDirectory){view.fileChooserWindowAFFDIC.setCurrentDirectory(new File(model.dicDirectory))}
 		def openResult = view.fileChooserWindowAFFDIC.showOpenDialog()
 		if(JFileChooser.APPROVE_OPTION == openResult) {
-			println(view.fileChooserWindowAFFDIC.selectedFile)
-			initializeDictionary(view.fileChooserWindowAFFDIC.selectedFile.toString())
+			File file = new File(view.fileChooserWindowAFFDIC.selectedFile.toString())
+			doOutside {
+				model.dicDirectory = file.getParent().toString()
+				initializeDictionary(file.toString())
+			}
+		}
+	}
+	
+	def selectDirectory = {evt = null ->
+		if(model.dirDirectory){view.fileChooserWindowDIR.setCurrentDirectory(new File(model.dirDirectory))}
+		def openResult = view.fileChooserWindowDIR.showOpenDialog()
+		if(JFileChooser.APPROVE_OPTION == openResult) {
+			File file = new File(view.fileChooserWindowDIR.selectedFile.toString())
+			doOutside {
+				model.dirDirectory = file.getParent().toString()
+				view.customPath.text = file.toString()
+			}
 		}
 	}
 	
@@ -89,7 +107,6 @@ class HunspellXMLController {
 			def hunName = file.getName().replaceAll(/\.[xX][mM][lL]$/, "")
 			model.options.hunspellFileName = hunName
 		}
-		println(model.options)
 		
 		try
 		{
@@ -194,28 +211,6 @@ class HunspellXMLController {
 		}
 	}
 	
-	private spellCheckDocument2(document, start, length)
-	{
-		def beg = document.getStartPosition().getOffset()
-		def end = beg + document.getLength() - 1
-		def ws1 = start
-		def ws2 = start + length - 1
-		println("ws1: $ws1 ; ws2: $ws2")
-		for(ws1; ws1 > 0; ws1--)
-		{
-			println("ws1: " + ws1)
-			if(document.getText(ws1, 1) =~ /[\s\t\r\n]/){break;}
-		}
-		println("...ws1: " + ws1)
-		for(ws2; ws2 < end; ws2++)
-		{
-			println("ws2: " + ws2)
-			if(document.getText(ws2, 1) =~ /[\s\t\r\n]/){break;}
-		}
-		println("...ws2: " + ws2)
-		println("getText($ws1, ${ws2-ws1})")
-		println(document.getText(ws1, ws2-ws1+1))
-	}
 	
 	private spellCheck(text)
 	{
@@ -236,49 +231,10 @@ class HunspellXMLController {
 		}
 		return "<html><body>" + results + "</body></html>"
 	}
+
 	
-	/*
-	private testFiles(hxe, tester)
+	def savePreferences()
 	{
-		if(hxe?.dicFile)
-		{
-			if(hxe?.goodFile)
-			{
-				//test correct spellings file
-				model.statusLog += "<br>Testing correctly spelled words in " + hxe.goodFile + "...<br>\r\n"
-				def errorList = tester.checkTestFile(hxe.goodFile)
-				if(errorList)
-				{
-					hxcLog.warning("Some words listed in " + (new File(hxe.goodFile)).getName() + " (which should contain only correct spellings) are rejected as misspellings by the current Hunspell dictionary:\r\n" +
-						"{\r\n\t" +
-						errorList.collect{e-> "${e.word} :: ${e.morph? 'morph:'+e.morph : ''} ${e.stem? 'stem:'+e.stem : ''} ${e.suggest? 'suggest:'+e.suggest : ''}"}.join("\r\n\t") +
-						"\r\n}\r\n"
-					)
-				}
-				else
-				{
-					model.statusLog += "OK.<br>\r\n"
-				}
-			}
-			if(hxe?.badFile)
-			{
-				//test misspellings file
-				model.statusLog += "<br>Testing misspelled words in " + hxe.badFile + "...<br>\r\n"
-				def errorList = tester.checkTestFile(hxe.badFile)
-				if(errorList)
-				{
-					hxcLog.warning("Some words listed in " + (new File(hxe.badFile)).getName() + " (which should contain only incorrect spellings)  are accepted as correctly spelled by the current Hunspell dictionary:\r\n" +
-						"{\r\n\t" +
-						errorList.collect{e-> "${e.word} :: ${e.morph? 'morph:'+e.morph : ''} ${e.stem? 'stem:'+e.stem : ''} ${e.suggest? 'suggest:'+e.suggest : ''}"}.join("\r\n\t") +
-						"\r\n}\r\n"
-					)
-				}
-				else
-				{
-					model.statusLog += "OK.<br>\r\n"
-				}
-			}
-		}
+		model.savePreferences()
 	}
-	*/
 }

@@ -1,25 +1,37 @@
 package hunspellxml
 
-import javax.swing.filechooser.FileFilter
 import main.ClosureFileDropHandler
 import main.JSpellCheckPane
 import java.awt.Dimension
 import javax.swing.event.DocumentListener
 import javax.swing.text.*
 
-fileChooserWindowXML = fileChooser(fileFilter: [getDescription: {-> "*.xml"}, accept:{file-> file ==~ /.*?\.xml/ || file.isDirectory() }] as FileFilter)
-//fileChooserWindowDIC = fileChooser(fileFilter: [getDescription: {-> "*.dic"}, accept:{file-> file ==~ /.*?\.dic/ || file.isDirectory() }] as FileFilter)
-fileChooserWindowAFFDIC = fileChooser(fileFilter: [getDescription: {-> "*.aff, *.dic"}, accept:{file-> file ==~ /.*?\.(aff|dic)/ || file.isDirectory() }] as FileFilter)
+fileChooserWindowXML = fileChooser(
+							fileFilter: [
+								getDescription: {"*.xml"}, 
+								accept:{it ==~ /.+\.xml/ || it.isDirectory()}
+							] as javax.swing.filechooser.FileFilter)
+fileChooserWindowAFFDIC = fileChooser(
+							fileFilter: [
+								getDescription: {"*.aff, *.dic"}, 
+								accept:{it ==~ /.+\.(aff|dic)/ || it.isDirectory()}
+							] as javax.swing.filechooser.FileFilter)
+fileChooserWindowDIR = fileChooser(acceptAllFileFilterUsed:false, 
+							fileSelectionMode:JFileChooser.DIRECTORIES_ONLY, 
+							fileFilter: [
+								getDescription: {-> "Directory"}, 
+							] as javax.swing.filechooser.FileFilter)
 closureFileDropHandler = new ClosureFileDropHandler({controller.dropFile(it)})
 
 
 
 
 application(title: 'HunspellXML',
-  preferredSize: [800, 600],
-  minimumSize: [800, 600],
+  defaultCloseOperation: WindowConstants.DO_NOTHING_ON_CLOSE,
+  windowClosing:{evt-> controller.quit()},
+  preferredSize: [810, 600],
+  minimumSize: [810, 600],
   pack: true,
-  //location: [50,50],
   locationByPlatform: true,
   iconImage:   imageIcon('/HunspellXML-icon-256x256.png').image,
   iconImages: [	imageIcon('/HunspellXML-icon-128x128.png').image,
@@ -36,6 +48,7 @@ application(title: 'HunspellXML',
 		action(id:"copyAction", name:"Copy", mnemonic:"C", accelerator:shortcut("C"), closure:controller.copy)
 		action(id:"selectAllAction", name:"Select All", mnemonic:"A", accelerator:shortcut("A"), closure:controller.selectAll)
 		action(id:"about", name:"About", mnemonic:"?", accelerator:shortcut("A"), closure:controller.about)
+		action(id:"selectDirectory", name:"...", closure:controller.selectDirectory)
 	}
 	menuBar {
 		menu("File")
@@ -69,10 +82,12 @@ application(title: 'HunspellXML',
 		label(text:"Export these files:")
 		for(map in model.toggleButtons)
 		{
-				checkBox(id:map.key, 
-					text:map.value, 
-					selected:(model.options[map.key]),
-					actionPerformed:{controller.toggleOption(map.key)})
+				def key = map.key
+				def val = map.value
+				checkBox(id:key, 
+					text:val, 
+					selected:(model.options[key]),
+					actionPerformed:{controller.toggleOption(key)})
 		}
 	}
 	panel(constraints:SOUTH)
@@ -116,6 +131,10 @@ application(title: 'HunspellXML',
 					{
 						textField(id:"customPath", text:"", columns:20)
 					}
+					td()
+					{
+						button(id:"dirSelect", text:"...", action:selectDirectory)
+					}
 				}
 				
 				tr()
@@ -126,8 +145,9 @@ application(title: 'HunspellXML',
 					}
 					td(align:"left")
 					{
-						textField(id:"hunspellFileName", text:"", columns:20)
+						textField(id:"hunspellFileName", text:"", columns:20, enabled:!model.hunspellFileNameUseInput)
 					}
+					td(){}
 				}
 				
 				tr()
@@ -144,6 +164,7 @@ application(title: 'HunspellXML',
 								hunspellFileName.enabled = !view.hunspellFileNameUseInput.selected
 							})
 					}
+					td(){}
 				}
 			}
 		}
