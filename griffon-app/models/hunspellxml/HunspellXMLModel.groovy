@@ -2,16 +2,22 @@ package hunspellxml
 
 import groovy.beans.Bindable
 import org.sil.hunspellxml.HunspellTester
+import main.JSpellCheckPane
 import main.Preferences
+import java.awt.Font
 
 @Bindable
 //@PropertyListener()
 class HunspellXMLModel 
 {
-   @Bindable String statusLog = ""
+   //@Bindable
+   String statusLog = ""
+   @Bindable String delimiters = "'-`~!@#\$%^&*()_+=[]\\{}|;:\",./<>?"
    String startingMessage = "<br><br><b>Drop your Hunspell.xml file here!</b><br><i>(Or use the File menu.)</i><br>"
    
    boolean hunspellFileNameUseInput = false
+   
+   Font font = new Font("SansSerif", Font.PLAIN, 12)
    
    def options = [hunspell:true,
 		tests:true,
@@ -64,10 +70,12 @@ class HunspellXMLModel
 					options[key] = config.options[key]
 				}
 			}
-			xmlDirectory = config.xmlDirectory
-			dicDirectory = config.dicDirectory
-			dirDirectory = config.dirDirectory
-			hunspellFileNameUseInput = config.hunspellFileNameUseInput
+			if(config.xmlDirectory){xmlDirectory = config.xmlDirectory}
+			if(config.dicDirecotry){dicDirectory = config.dicDirectory}
+			if(config.dirDirectory){dirDirectory = config.dirDirectory}
+			if(config.hunspellFileNameUseInput){hunspellFileNameUseInput = config.hunspellFileNameUseInput}
+			if(config.font){font = Font.decode(config.font)}
+			if(config.delimiters){delimiters = config.delimiters}
 		}
 	}
 	
@@ -81,6 +89,23 @@ class HunspellXMLModel
 		map.dicDirectory = dicDirectory.replaceAll($/\\/$, "/")
 		map.dirDirectory = dirDirectory.replaceAll($/\\/$, "/")
 		map.hunspellFileNameUseInput = hunspellFileNameUseInput
+		map.font = getFontString()
+		map.delimiters = delimiters.replaceAll($/\\/$, "\\\\\\\\")
 		Preferences.savePreferences(map)
+	}
+	
+	def getFontString()
+	{
+		if(!font){return ""}
+		def fontString = font.getFontName()
+		def sep = " "
+		if(fontString.contains(" ")){sep = "-"}
+		fontString += sep
+		if(font.isPlain()){fontString += "PLAIN"}
+		if(font.isBold()){fontString += "BOLD"}
+		if(font.isItalic()){fontString += "ITALIC"}
+		fontString += sep
+		fontString += font.getSize()
+		return fontString
 	}
 }

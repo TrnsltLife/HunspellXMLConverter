@@ -4,6 +4,7 @@ lib/*.jar
 staging/**
 local-tests/**
 src/installer/**
+snippets/**
 hunspell-xml*.jar
 *.class
 *.tmp

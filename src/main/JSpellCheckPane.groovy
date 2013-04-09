@@ -7,14 +7,14 @@ import javax.swing.text.*
 
 class JSpellCheckPane extends JTextPane
 {
-	SimpleAttributeSet normalStyle
-	SimpleAttributeSet errorStyle
-	String delimiters
+	private static final String defaultDelimiters = " \t\n\r\f"
+	
+	private String delimiters = defaultDelimiters
 	def spellCheckMethod
 	
 	public JSpellCheckPane(spellCheckMethod)
 	{
-		this(spellCheckMethod, " \t\n\r\f")
+		this(spellCheckMethod, "")
 	}
 	
 	public JSpellCheckPane(spellCheckMethod, delimiters)
@@ -25,19 +25,35 @@ class JSpellCheckPane extends JTextPane
 		setPreferredSize(new Dimension(400, 100))
 		
 		this.spellCheckMethod = spellCheckMethod
-		this.delimiters = delimiters
+		setDelimiters(delimiters)
 
 		injectSpellCheckMethod()
-		
-		//normal style
-		normalStyle = new SimpleAttributeSet();
-		StyleConstants.setUnderline(normalStyle, false)
-		StyleConstants.setForeground(normalStyle, Color.black)
-
-		//red and underlined
-		errorStyle = new SimpleAttributeSet();
-		StyleConstants.setUnderline(errorStyle, true)
-		StyleConstants.setForeground(errorStyle, Color.red)
+	}
+	
+	public setDelimiters(String delim)
+	{
+		//Always use whitespace as delimiters. Allow adding additional delimiters.
+		String d = " \t\n\r\f"
+		delim = delim.replaceAll(/[ \t\n\r\f]/, "")
+		delimiters = d + delim
+	}
+	
+	public String getDelimiters()
+	{
+		return delimiters
+	}
+	
+	public String getCustomDelimiters()
+	{
+		//Return the list of delimiters, minus the default whitespace delimiters
+		def delim = delimiters
+		delim = delim.replaceAll(/[ \t\n\r\f]/, "")
+		return delim
+	}
+	
+	public static String getDefaultDelimiters()
+	{
+		return defaultDelimiters
 	}
 	
 	private injectSpellCheckMethod()
@@ -45,12 +61,12 @@ class JSpellCheckPane extends JTextPane
 		def spellCheckingDocumentListener = [
 			insertUpdate:{e->
 				SwingUtilities.invokeLater{
-					spellCheckMethod.call(e.getDocument(), e.getOffset(), e.getLength(), normalStyle, errorStyle, delimiters)
+					spellCheckMethod.call(e.getDocument(), e.getOffset(), e.getLength(), delimiters)
 				}
 			},
 			removeUpdate:{e->
 				SwingUtilities.invokeLater{
-					spellCheckMethod.call(e.getDocument(), e.getOffset(), e.getLength(), normalStyle, errorStyle, delimiters)
+					spellCheckMethod.call(e.getDocument(), e.getOffset(), e.getLength(), delimiters)
 				}
 			},
 			changedUpdate:{e->
@@ -61,6 +77,6 @@ class JSpellCheckPane extends JTextPane
 	
 	public checkSpelling()
 	{
-		spellCheckMethod.call(getDocument(), getDocument().getStartPosition().getOffset(), getDocument().getLength(), normalStyle, errorStyle, delimiters)
+		spellCheckMethod.call(getDocument(), getDocument().getStartPosition().getOffset(), getDocument().getLength(), delimiters)
 	}
 }

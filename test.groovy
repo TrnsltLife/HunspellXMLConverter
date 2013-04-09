@@ -1,3 +1,4 @@
-def file = "test.dic"
-def test = (file ==~ /.*?\.(aff|dic)/)
-println test
+import java.awt.Font
+
+def font = new Font("Arial", Font.BOLD, 14)
+println(font)

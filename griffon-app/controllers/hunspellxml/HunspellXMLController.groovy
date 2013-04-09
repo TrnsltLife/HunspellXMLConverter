@@ -1,10 +1,13 @@
 package hunspellxml
 
 import javax.swing.JFileChooser
+import java.awt.KeyboardFocusManager
 import java.awt.Window
+import main.JFontChooser
 import main.StackTrace
 import org.sil.hunspellxml.HunspellXMLConverter
 import org.sil.hunspellxml.HunspellTester
+import java.beans.PropertyChangeListener
 
 class HunspellXMLController {
     // these will be injected by Griffon
@@ -12,18 +15,26 @@ class HunspellXMLController {
     def view
 	def hxcLog
 	
+	
+    void mvcGroupInit(Map args) {
+        // this method is called after model and view are injected
+		model.statusLog += model.startingMessage
+		
+		model.addPropertyChangeListener({ e ->
+			println("property changed: " + e.getPropertyName())
+			if(e.getPropertyName() == "delimiters")
+			{
+				changeDelimiters()
+			}
+		} as PropertyChangeListener)
+    }
+	
+	
 	def quit = { evt = null ->
 		savePreferences()
 		app.shutdown()
 	}
 	
-	def copy = { evt = null ->
-		view.textPane.copy()
-	}
-	
-	def selectAll = { evt = null ->
-		view.textPane.selectAll()
-	}
 	
 	def about = { evt = null ->
 		withMVCGroup("about", [owner: Window.windows.find{it.focused}]) { m, v, c ->
@@ -32,10 +43,6 @@ class HunspellXMLController {
 		}
 	}
 
-    void mvcGroupInit(Map args) {
-        // this method is called after model and view are injected
-		model.statusLog += model.startingMessage
-    }
 	
     def openAndConvert = { evt = null ->
 		if(model.xmlDirectory){view.fileChooserWindowXML.setCurrentDirectory(new File(model.xmlDirectory))}
@@ -91,6 +98,35 @@ class HunspellXMLController {
 			model.tester = new HunspellTester(file)
 			model.statusLog = "Loaded spellcheck dictionary: " + file + "<br>\r\n" + model.startingMessage
 		}
+		view.spellCheck.checkSpelling()
+	}
+	
+	def chooseFont = {evt=null->
+		view.fontChooser.setSelectedFont(model.font)
+		def result = view.fontChooser.showDialog(Window.windows.find{it.focused})
+		if(result == JFontChooser.OK_OPTION)
+		{
+			model.font = view.fontChooser.getSelectedFont();
+			updateFont()
+		}
+	}
+	
+	def updateFont()
+	{
+		view.textPane.setFont(model.font)
+		view.spellCheck.setFont(model.font)
+		view.fontLabel.text = model.getFontString()
+	}
+	
+	def changeDelimiters()
+	{
+		view.spellCheck.setDelimiters(view.delimitersField.text)
+		view.spellCheck.checkSpelling()
+	}
+	
+	def resetDelimiters = {evt=null->
+		view.spellCheck.setDelimiters("'-`~!@#\$%^&*()_+=[]\\{}|;:\",./<>?")
+		view.delimitersField.text = view.spellCheck.getCustomDelimiters()
 		view.spellCheck.checkSpelling()
 	}
 	
@@ -172,11 +208,14 @@ class HunspellXMLController {
 		return """<font color="#ff0000">""" + text.toString() + "</font><br>\r\n"
 	}
 	
-	private spellCheckDocument(document, start, length, normalStyle, errorStyle, delimiters)
+	//private spellCheckDocument(document, start, length, normalStyle, errorStyle, delimiters)
+	private spellCheckDocument(document, start, length, delimiters)
 	{
 		def beg = document.getStartPosition().getOffset()
 		def end = beg + document.getLength()
 		String text = document.getText(beg, end)
+		
+		view.spellCheck.getHighlighter().removeAllHighlights()
 
 		if(model.tester)
 		{
@@ -185,29 +224,25 @@ class HunspellXMLController {
 			while(st.hasMoreTokens())
 			{
 				def token = st.nextToken()
-				if(token =~ /[$delimiters]/)
+				if(delimiters.contains(token))
 				{
-					document.setCharacterAttributes(offset, token.size(), normalStyle, true)
+					//don't underline it
 				}
 				else
 				{
 					if(model.tester?.misspelled(token))
 					{
-						//random, misspelled
-						document.setCharacterAttributes(offset, token.size(), errorStyle, true)
+						//misspelled
+						view.spellCheck.getHighlighter().addHighlight(offset, offset+token.size(), view.badJag);
 					}
 					else
 					{
-						//random, correct
-						document.setCharacterAttributes(offset, token.size(), normalStyle, true)
+						//correct
+						view.spellCheck.getHighlighter().addHighlight(offset, offset+token.size(), view.goodJag);
 					}
 				}
 				offset += token.size()
 			}
-		}
-		else
-		{
-			document.setCharacterAttributes(beg, end, normalStyle, true)
 		}
 	}
 	
