@@ -174,20 +174,23 @@ class HunspellXMLController {
 					hxc.convert()
 					
 					//Run tests
-					if(hxc?.tester)
+					if(model.options.runTests && hxc?.tester)
 					{
 						model.tester = hxc.tester
 					}
 					
-					if(hxc?.parser?.check?.checkMap)
+					if(model.options.printPaths)
 					{
-						hxcLog.info("List of affixation paths in your dictionary:")
-					}
-					for(entry in hxc?.parser?.check?.checkMap)
-					{
-						def route = entry.value.route
-						StringBuffer sb = new StringBuffer()
-						hxcLog.info(hxc.parser.check.shortFormatRoute(route, true))
+						if(hxc?.parser?.check?.checkMap)
+						{
+							hxcLog.info("List of affixation paths in your dictionary:")
+						}
+						for(entry in hxc?.parser?.check?.checkMap)
+						{
+							def route = entry.value.route
+							StringBuffer sb = new StringBuffer()
+							hxcLog.info(hxc.parser.check.shortFormatRoute(route, true))
+						}
 					}
 					
 					

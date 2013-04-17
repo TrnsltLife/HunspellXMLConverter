@@ -29,6 +29,7 @@ class HunspellXMLModel
 		opera:true,
 		relaxNG:false,
 		runTests:true,
+		printPaths:true,
 		customPath:"",
 		hunspellFileName:""]
 	
@@ -46,7 +47,9 @@ class HunspellXMLModel
 		[key:"firefox", value:"Firefox"],
 		[key:"libreOffice", value:"LibreOffice"],
 		[key:"opera", value:"Opera"],
-		[key:"relaxNG", value:"RelaxNG Schema"]
+		[key:"relaxNG", value:"RelaxNG Schema"],
+		[key:"runTests", value:"Run Tests"],
+		[key:"printPaths", value:"Print Paths"]
 	]
 	
 	HunspellTester tester
