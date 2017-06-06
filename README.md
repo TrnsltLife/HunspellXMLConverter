@@ -7,4 +7,4 @@ You can read more about the HunspellXML format on the [HunspellXML wiki](https:/
 
 You can download the executable jar (HunspellXML-Converter-[version].jar) from the [HunspellXML project on Google Code](https://code.google.com/p/hunspellxml/downloads/list).
 
-![HunspellXML-Converter](https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/hunspellxml/HunspellXML-Converter-Screenshot-0.21.png)
+![HunspellXML-Converter](https://github.com/TrnsltLife/HunspellXMLConverter/releases/download/v0.25/HunspellXML-Converter-Screenshot-0.21.png)
