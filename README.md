@@ -1,4 +1,4 @@
-![HunspellXML](https://user-images.githubusercontent.com/280842/26846538-ce479496-4aae-11e7-95a1-98b8ff576987.png)
+![HunspellXML](https://user-images.githubusercontent.com/280842/26846536-ce44bbea-4aae-11e7-8b7f-63787698ddef.png)
 
 HunspellXMLConverter
 ====================
